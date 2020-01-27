@@ -19,7 +19,7 @@ class Run:
         self.create.start()
         self.create.safe()
 
-        self.drive_straight()
+        # self.drive_straight()
 
         # self.drive_forward()
 
@@ -27,7 +27,7 @@ class Run:
 
         # self.turn_left()
 
-        self.rotate_backwards()
+        # self.rotate_backwards()
 
         self.sleep_drive_straight()
 
@@ -36,11 +36,13 @@ class Run:
     def drive_forward(self):
         self.create.drive_direct(0, 0)
 
-    def turn_left(self):
+    def turn_left_inplace(self):
         self.create.drive_direct(ROTATE_90_DEGREES_CONST, -ROTATE_90_DEGREES_CONST)
+        self.time.sleep(10)
 
-    def turn_right(self):
+    def turn_right_inplace(self):
         self.create.drive_direct(-ROTATE_90_DEGREES_CONST, ROTATE_90_DEGREES_CONST)
+        self.time.sleep(10)
 
     def rotate_backwards(self):
         self.create.drive_direct(-ROTATE_90_DEGREES_CONST * 2, ROTATE_90_DEGREES_CONST * 2)

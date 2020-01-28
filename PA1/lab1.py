@@ -20,8 +20,26 @@ class Run:
         self.create.start()
         self.create.safe()
 
-        self.my_robot.base_speed = 0.1
-        self.my_robot.forward(1, 0.1)
-        self.my_robot.turn_left_inplace(1, None)
-        self.my_robot.forward(1, 0.1)
+        # forward
+        # self.my_robot.forward(1, 0.1)
+
+        # forward & backward
+        # self.my_robot.forward(1, 0.1)
+        # self.my_robot.backward(1, 0.1)
+
+        # turn left
+        # self.my_robot.forward(1, 0.1)
+        # self.my_robot.turn_left_inplace(1, 0.182)
+        # self.my_robot.forward(1, 0.1)
+
+        # turn right
+        # self.my_robot.forward(1, 0.1)
+        # self.my_robot.turn_right_inplace(1, 0.182)
+        # self.my_robot.forward(1, 0.1)
+
+        # straight and wait
+        self.create.drive(100, 10)
+        # self.create.drive_direct(100, 100)
+        self.my_robot.wait(15)
+
         self.my_robot.stop()

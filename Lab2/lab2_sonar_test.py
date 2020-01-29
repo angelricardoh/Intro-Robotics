@@ -27,14 +27,15 @@ class Run:
         # First element gets 3.3
         data.pop(0)
         print(data)
-        correct_res = 0.53
-        Utils.show_stat(np.asarray(data), correct_res)
-        Utils.plot_hist(np.asarray(data))
+        ground_truth_measure = float(input("Enter correct distance"))
+        Utils.show_stat(np.asarray(data), ground_truth_measure)
+        # Utils.plot_hist(np.asarray(data))
         self.create.stop()
 
-        # while True:
-        #     print(self.sonar.get_distance())
-        #     self.time.sleep(0.1)
+        while True:
+            print(self.sonar.get_distance())
+            self.time.sleep(0.1)
+
 
 class Utils:
     def plot_hist(s, num_bins: int = 20):
@@ -46,30 +47,5 @@ class Utils:
         plt.show()
 
     def show_stat(s, correct_res: float = 0):
-        print("Mean: " + str(np.mean(s - correct_res)))
+        print("Mean: " + str(np.mean(abs(correct_res - s))))
         print("SD: " + str(np.std(s)))
-
-    # def run(self):
-    #     data = np.zeros(100, dtype=float)
-    #     for i in range(0, 100):
-    #         data[i] = self.sonar.get_distance()
-    #         print(data[i])
-    #         self.time.sleep(0.1)
-    #
-    #     print("Stats: ")
-    #     correct_res = input("Enter correct distance")
-    #     show_stat(data, float(correct_res))
-    #     plot_hist(data)
-
-
-# def plot_hist(data=None, num_bins: int = 20) -> None:
-#     if data is None:
-#         data = np.random.normal(0, 0.5, 10000)
-#
-#     plt.hist(data, bins=num_bins, edgecolor='black', linewidth=1.0)
-#     plt.show()
-#
-#
-# def show_stat(data, correct_res: float = 0) -> None:
-#     print("Mean: " + str(np.mean(data - correct_res)))
-#     print("SD: " + str(np.std(data)))

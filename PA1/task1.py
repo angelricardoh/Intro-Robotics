@@ -10,10 +10,12 @@ def myfib1(n):
         return n
     return myfib1(n - 1) + myfib1(n - 2)
 
-
+# Test cases 2.1
 print(mysum1([1, 5, 7]))
 print(mysum1([]))
 print(mysum1([-5, 3]))
+
+# Test cases 2.2
 print(myfib1(3))
 print(myfib1(5))
 print(myfib1(7))

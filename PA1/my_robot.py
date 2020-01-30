@@ -9,22 +9,22 @@ class MyRobot:
 
     def forward(self, distance, speed=None):
         mm_over_seg_speed = self.get_mm_over_seg_speed(speed)
-        time = distance / speed
+        time = distance / (mm_over_seg_speed / 1e3)
         self.__create.drive_direct(mm_over_seg_speed, mm_over_seg_speed)
         self.__time.sleep(time)
 
     def backward(self, distance, speed=None):
         mm_over_seg_speed = self.get_mm_over_seg_speed(speed)
-        time = distance / speed
+        time = distance / (mm_over_seg_speed / 1e3)
         self.__create.drive_direct(-mm_over_seg_speed, -mm_over_seg_speed)
         self.__time.sleep(time)
 
-    def turn_left_inplace(self, duration, speed):
+    def turn_left(self, duration, speed=None):
         mm_over_seg_speed = self.get_mm_over_seg_speed(speed)
         self.__create.drive_direct(mm_over_seg_speed, -mm_over_seg_speed)
         self.__time.sleep(duration)
 
-    def turn_right_inplace(self, duration, speed):
+    def turn_right(self, duration, speed=None):
         mm_over_seg_speed = self.get_mm_over_seg_speed(speed)
         self.__create.drive_direct(-mm_over_seg_speed, mm_over_seg_speed)
         self.__time.sleep(duration)
@@ -43,22 +43,10 @@ class MyRobot:
         self.__create.drive_direct(-speed, speed)
         self.__time.sleep(duration)
 
-    def turn_left(self):
-        self.forward(1, 0.1)
-        self.turn_left_inplace()
-        self.forward(1, 0.1)
-
-    def turn_right(self):
-        self.forward(1, 0.1)
-        self.turn_right_inplace()
-        self.forward(1, 0.1)
-
-    def stop(self):
-        self.__create.stop()
-
-    def wait(self, duration):
-        self.__time.sleep(duration)
-        self.__create.stop()
+    def stop(self, duration=None):
+        if duration is not None:
+            self.__time.sleep(duration)
+        self.__create.drive_direct(0, 0)
 
     def get_mm_over_seg_speed(self, speed):
         if speed is None:

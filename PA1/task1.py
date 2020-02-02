@@ -15,6 +15,8 @@ print(mysum1([1, 5, 7]))
 print(mysum1([]))
 print(mysum1([-5, 3]))
 
+print("\n")
+
 # Test cases 2.2
 print(myfib1(3))
 print(myfib1(5))

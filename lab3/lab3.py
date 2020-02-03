@@ -16,6 +16,7 @@ class Run:
         self.create = factory.create_create()
         self.time = factory.create_time_helper()
         self.my_robot = MyRobot(self.create, self.time)
+        self.my_robot.position_tracking = True
 
     def run(self):
         self.create.start()
@@ -27,40 +28,37 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        # forward
-        self.printState()
-        self.my_robot.forward(1, 0.1)
-        self.printState()
+        default_turn_speed = 0.182 # Default speed to make 90 degree turns in 10 seg
 
-        # forward & backward
-        self.my_robot.backward(1, 0.1)
+        # Lab 3 section 2.1
+        # while True:
+        #     state = self.create.update()
+        #     if state is not None:
+        #         print(state.__dict__)
 
-        self.printState()
-        # turn left
-        self.my_robot.turn_left(1, 0.182)
-        self.my_robot.forward(1, 0.1)
+        # Lab 3 section 2.2
+        self.my_robot.forward(1)
+        self.my_robot.turn_left_90_degrees_inplace(0.05)
+        self.my_robot.turn_right_90_degrees_inplace(0.05)
+        self.my_robot.backward(1)
 
-        self.printState()
-        # turn right
-        self.my_robot.turn_right(1, 0.182)
-        self.my_robot.forward(1, 0.1)
-        self.my_robot.turn_right(1, 0.182)
-        self.printState()
-        # drive and stop in 10 seg
-        self.create.drive_direct(100, 100)
-        self.my_robot.stop(10)
-        self.printState()
-        # drive and stop inmediately
-        self.my_robot.turn_right(1, 0.182)
-        self.create.drive_direct(100, 100)
+        # Lab 3 section 4.1 1-meter square clockwise
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+
+        # Lab 3 section 4.2 1-meter square counter-clockwise
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+
+        # Lab 3 section 4.3 15-meter straight ine
+        self.my_robot.forward(15)
+
         self.my_robot.stop()
-
-       # while True:
-       #     state = self.create.update()
-       #     if state is not None:
-       #         print(state.__dict__)
-
-    def printState(self):
-        state = self.create.update()
-        if state is not None:
-            print(state.__dict__)

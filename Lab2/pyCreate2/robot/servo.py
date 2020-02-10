@@ -39,13 +39,14 @@ class Servo:
             angle
 
         # percent = (angle + 90) / 180 * self.full_pulse / self.period
-        # pulse_out_diff = PULSOUT_225_MS - PULSOUT_075_MS
-        # percent = ((angle + 90) / SERVO_DEGREE_LIMITATION * pulse_out_diff + PULSOUT_075_MS) / 100.0
-        # print("angle: " + str(angle) + " percent: " + str(percent))
+        pulse_out_diff = PULSOUT_225_MS - PULSOUT_075_MS
+        percent = ((angle + 90) / SERVO_DEGREE_LIMITATION * pulse_out_diff + PULSOUT_075_MS) / 100.0
 
-        max_pwm = 2.25/20
-        min_pwm = 0.75/20
-        duty_cycle_percent = ((((angle + 90) / SERVO_DEGREE_LIMITATION) * (max_pwm - min_pwm) + min_pwm))* 100
+        print("angle: " + str(angle) + " percent: " + str(percent))
         self.pwm.set_duty_cycle(percent)
+        # max_pwm = 2.25/20
+        # min_pwm = 0.75/20
+        # duty_cycle_percent = ((((angle + 90) / SERVO_DEGREE_LIMITATION) * (max_pwm - min_pwm) + min_pwm))* 100
+        # self.pwm.set_duty_cycle(duty_cycle_percent)
 
 

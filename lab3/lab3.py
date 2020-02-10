@@ -19,6 +19,7 @@ class Run:
         self.my_robot.position_tracking = True
 
     def run(self):
+        self.create.stop()
         self.create.start()
         self.create.safe()
 
@@ -37,28 +38,34 @@ class Run:
         #         print(state.__dict__)
 
         # Lab 3 section 2.2
-        self.my_robot.forward(1)
-        self.my_robot.turn_left_90_degrees_inplace(0.05)
-        self.my_robot.turn_right_90_degrees_inplace(0.05)
-        self.my_robot.backward(1)
+        # self.my_robot.forward(1)
+        # self.my_robot.update_odometry()
 
-        # Lab 3 section 4.1 1-meter square clockwise
-        # self.my_robot.forward(1)
-        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
-        # self.my_robot.forward(1)
-        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
-        # self.my_robot.forward(1)
-        # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.backward(1)
+        # self.my_robot.update_odometry()
 
-        # Lab 3 section 4.2 1-meter square counter-clockwise
+        # self.my_robot.turn_left_90_degrees_inplace(0.05)
+        # self.my_robot.update_odometry()
+
+        # # Lab 3 section 4.1 1-meter square clockwise
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_right_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_right_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+        # self.my_robot.turn_right_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
+
+        # # Lab 3 section 4.2 1-meter square counter-clockwise
         # self.my_robot.forward(1)
         # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
         # self.my_robot.forward(1)
         # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
         # self.my_robot.forward(1)
         # self.my_robot.turn_left_90_degrees_inplace(default_turn_speed)
+        # self.my_robot.forward(1)
 
         # Lab 3 section 4.3 15-meter straight ine
-        self.my_robot.forward(15)
-
+        self.my_robot.forward(1, 0.05)
+        self.create.stop()
         self.my_robot.stop()

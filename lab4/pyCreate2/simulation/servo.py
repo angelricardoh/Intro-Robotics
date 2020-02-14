@@ -17,8 +17,6 @@ class Servo:
         Args:
             client_id (integer): V-REP client id.
         """
-        print("clientID")
-        print(client_id)
         self._clientID = client_id
         # query objects
         rc, self._joint = vrep.simxGetObjectHandle(self._clientID, "servo_joint", vrep.simx_opmode_oneshot_wait)

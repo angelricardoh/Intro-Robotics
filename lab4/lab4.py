@@ -1,7 +1,6 @@
 from p_controller import PController
 from pd_controller import PDController
 
-
 BASE_SPEED = 100
 
 
@@ -13,22 +12,18 @@ class Run:
         self.servo = factory.create_servo()
         # define the gains here
         # self.kp = 100
-        self.kp = 1700
-        self.kd = 50
+        self.kp = 1000
+        self.kd = 20
         self.minOutput = -250
         self.maxOutput = 250
         # instantiate your controllers here
         self.p_controller = PController(self.kp, self.minOutput, self.maxOutput)
         self.pd_controller = PDController(self.kp, self.kd, self.minOutput, self.maxOutput)
 
-        self.current_time_l = None
         self.previous_time_l = None
-        self.current_error_l = None
         self.previous_error_l = None
 
-        self.current_time_r = None
         self.previous_time_r = None
-        self.current_error_r = None
         self.previous_error_r = None
 
     def run(self):
@@ -40,60 +35,49 @@ class Run:
 
         goal_distance = 0.5
 
-        base_speed = BASE_SPEED
-        v_left = BASE_SPEED
-        v_right = BASE_SPEED
-
         while True:
             distance = self.sonar.get_distance()
             if distance is not None:
                 # update controllers and move robot here
                 # ...
 
-                differential_controller = False
-                v_left = int(self.f_left(differential_controller, v_left, base_speed, goal_distance - distance))
-                v_right = int(self.f_right(differential_controller, v_right, base_speed, goal_distance - distance))
+                differential_controller = True
+                error = goal_distance - distance
+                velocity_left_wheel = self.f_left(differential_controller, self.time.time(), error)
+                velocity_right_wheel = self.f_right(differential_controller, self.time.time(), error)
 
-                print("[curr_state = %f, error = %f\nright: %f, left: %f]\n" % (
+                print("[curr_state = %f, error = %f, right: %f, left: %f]\n" % (
                     distance,
                     goal_distance - distance,
-                    v_right,
-                    v_left
+                    velocity_right_wheel,
+                    velocity_left_wheel
                 ))
 
                 self.create.drive_direct(
-                    v_right,
-                    v_left
+                    int(velocity_right_wheel),
+                    int(velocity_left_wheel)
                 )
 
                 self.time.sleep(0.1)
 
-    def f_left(self, differential_controller, base_speed, current_speed, u) -> float:
-        self.current_time_l = self.time.time()
-        self.current_error_l = u
-        if u > 0:
-            return base_speed
+    def f_left(self, differential_controller, current_time, current_error) -> float:
         if differential_controller:
-            diff_power = self.pd_controller.update(self.current_error_l, self.current_time_l, \
+            delta_power = self.pd_controller.update(current_error, current_time, \
                                                    self.previous_error_l, self.previous_time_l)
         else:
-            diff_power = self.p_controller.update(u)
-        self.previous_time_l = self.current_time_l
-        self.previous_error_l = self.current_error_l
-        power = (current_speed + diff_power)
+            delta_power = self.p_controller.update(current_error)
+        self.previous_time_l = current_time
+        self.previous_error_l = current_error
+        power = BASE_SPEED + delta_power
         return power
 
-    def f_right(self, differential_controller, base_speed, current_speed, u) -> float:
-        self.current_time_r = self.time.time()
-        self.current_error_r = u
-        if u < 0:
-            return base_speed
+    def f_right(self, differential_controller, current_time, current_error) -> float:
         if differential_controller:
-            diff_power = self.pd_controller.update(self.current_error_r, self.current_time_r, \
+            delta_power = self.pd_controller.update(current_error, current_time, \
                                                    self.previous_error_r, self.previous_time_r)
         else:
-            diff_power = self.p_controller.update(u)
-        self.previous_time_r = self.current_time_r
-        self.previous_error_r = self.current_error_r
-        power = (current_speed - diff_power)
+            delta_power = self.p_controller.update(current_error)
+        self.previous_time_r = current_time
+        self.previous_error_r = current_error
+        power = BASE_SPEED - delta_power
         return power

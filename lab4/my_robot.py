@@ -111,7 +111,7 @@ class MyRobot:
             self.speed_right = delta_r / t
             self.average_speed = delta_d / t
 
-            if self.count == 10:
+            if self.count == 10: # In order to not process to many logs
                 print("x = %.4f y = %.4f degrees = %.4f" % (self.x, self.y, theta_degrees))
                 print(state.__dict__, flush=True)
                 self.count = 0

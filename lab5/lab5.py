@@ -5,6 +5,7 @@ import copy
 
 # if on the robot, don't use X backend
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -12,8 +13,8 @@ import odometry
 import pd_controller
 import pid_controller
 
-
 BASE_SPEED = 0
+
 
 class Run:
     def __init__(self, factory):
@@ -24,7 +25,10 @@ class Run:
         self.odometry = odometry.Odometry()
         self.pdTheta = pd_controller.PDController(75, 1, -200, 200)
         # self.pdTheta = pd_controller.PDController(200, 10, -75, 75)
-        self.pidTheta = pid_controller.PIDController(1000, 20, 100, -200, 200)
+        # self.pdTheta = pd_controller.PDController(500, 100, -200, 200)
+        self.pidTheta = pid_controller.PIDController(1000, 20, 100, -200, 200, -200, 200)
+        # self.pidTheta = pid_controller.PIDController(500, 100, 1000, -200, 200, -500, 500)
+        # self.pidTheta = pid_controller.PIDController(1500, 50, 100, -200, 200, -500, 500)
 
     def run(self):
         self.create.start()
@@ -41,7 +45,7 @@ class Run:
         # goal_y = ...
         base_speed = 0
 
-        result = np.empty((0,3))
+        result = np.empty((0, 3))
         end_time = self.time.time() + 10
         print("goal = ", math.degrees(goal_theta))
         while self.time.time() < end_time:
@@ -53,26 +57,24 @@ class Run:
                 new_row = [self.time.time(), math.degrees(self.odometry.theta), math.degrees(goal_theta)]
                 result = np.vstack([result, new_row])
 
-
                 reference = float(goal_theta)
                 measured = float(self.odometry.theta)
                 # reference = math.degrees(goal_theta)
                 # measured = math.degrees(self.odometry.theta)
-                #
-                delta_power = self.pdTheta.update(reference, measured, self.time.time())
-                # delta_power = self.pdTheta.update(goal_theta, self.odometry.theta, self.time.time())
-                # delta_power = self.pidTheta.update(goal_theta, self.odometry.theta, self.time.time())
+
+                # Section 2.2
+                # delta_power = self.pdTheta.update(reference, measured, self.time.time())
+                delta_power = self.pidTheta.update(reference, measured, self.time.time())
 
                 self.create.drive_direct(int(BASE_SPEED + delta_power), int(BASE_SPEED - delta_power))
 
-
         # plotting for go-to-angle goal_theta:
         plt.title("Angle")
-        plt.plot(result[:,0], result[:,1], label="odometry")
-        plt.plot(result[:,0], result[:,2], label="goal")
+        plt.plot(result[:, 0], result[:, 1], label="odometry")
+        plt.plot(result[:, 0], result[:, 2], label="goal")
         plt.grid()
         plt.legend()
-        plt.savefig("lab6_angle.png") # make s ure to not overwrite plots
+        plt.savefig("lab6_angle.png")  # make s ure to not overwrite plots
 
         # plotting for go-to-goal (goal_x, goal_x):
         # plt.figure()

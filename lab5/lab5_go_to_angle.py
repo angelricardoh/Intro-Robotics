@@ -41,9 +41,8 @@ class Run:
         ])
 
         goal_theta = math.pi / 2
-        # goal_x = ...
-        # goal_y = ...
-        base_speed = 0
+        # goal_theta = -math.pi / 2
+        # goal_theta = math.pi
 
         result = np.empty((0, 3))
         end_time = self.time.time() + 10
@@ -52,18 +51,18 @@ class Run:
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                print(self.odometry.theta)
+                # print(self.odometry.theta)
                 print("[%.6f, %.6f, %.6f]" % (self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
                 new_row = [self.time.time(), math.degrees(self.odometry.theta), math.degrees(goal_theta)]
                 result = np.vstack([result, new_row])
 
                 reference = float(goal_theta)
                 measured = float(self.odometry.theta)
-                # reference = math.degrees(goal_theta)
-                # measured = math.degrees(self.odometry.theta)
 
                 # Section 2.2
                 # delta_power = self.pdTheta.update(reference, measured, self.time.time())
+
+                # Section 3.2
                 delta_power = self.pidTheta.update(reference, measured, self.time.time())
 
                 self.create.drive_direct(int(BASE_SPEED + delta_power), int(BASE_SPEED - delta_power))
@@ -75,20 +74,3 @@ class Run:
         plt.grid()
         plt.legend()
         plt.savefig("lab6_angle.png")  # make s ure to not overwrite plots
-
-        # plotting for go-to-goal (goal_x, goal_x):
-        # plt.figure()
-        # f, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-        # ax1.set_title("Angle")
-        # ax1.plot(result[:,0], result[:,1], label="odometry")
-        # ax1.plot(result[:,0], result[:,2], label="goal")
-        # ax1.grid()
-        # ax1.legend()
-
-        # ax2.set_title("Position")
-        # ax2.plot(result[:,3], result[:,4], label="odometry")
-        # ax2.scatter([goal_x], [goal_y], color="r", s=40, label="goal")
-        # ax2.axis("equal")
-        # ax2.grid()
-        # ax2.legend()
-        # plt.savefig("lab6_position.png")

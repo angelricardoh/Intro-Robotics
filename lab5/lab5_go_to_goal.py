@@ -43,6 +43,9 @@ class Run:
         goal_theta = math.atan2(goal_x, goal_y)
         threshold = 0.01
 
+        desired_angles = np.array([])
+        measured_angles = np.array([])
+
         result = np.empty((0, 5))
         end_time = self.time.time() + 10
 
@@ -69,6 +72,9 @@ class Run:
                 distance = euclidean_distance(goal_x - self.odometry.x, goal_y - self.odometry.y)
                 reference = float(goal_theta)
                 measured = float(self.odometry.theta)
+
+                desired_angles = np.append(desired_angles, reference)
+                measured_angles = np.append(measured_angles, measured)
 
                 # Section 4.1
                 # # delta_power = self.pdTheta.update(reference, measured, self.time.time())
@@ -107,6 +113,9 @@ class Run:
         ax2.grid()
         ax2.legend()
         plt.savefig("lab5_position.png")
+
+        np.savetxt("desired_angle_output.csv", desired_angles, delimiter=",")
+        np.savetxt("measured_angle_output.csv", measured_angles, delimiter=",")
 
 
 def euclidean_distance(x, y):

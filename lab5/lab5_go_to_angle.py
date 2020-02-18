@@ -26,9 +26,9 @@ class Run:
         self.pdTheta = pd_controller.PDController(75, 1, -200, 200)
         # self.pdTheta = pd_controller.PDController(200, 10, -75, 75)
         # self.pdTheta = pd_controller.PDController(500, 100, -200, 200)
-        self.pidTheta = pid_controller.PIDController(1000, 20, 100, -200, 200, -200, 200)
-        # self.pidTheta = pid_controller.PIDController(500, 100, 1000, -200, 200, -500, 500)
-        # self.pidTheta = pid_controller.PIDController(1500, 50, 100, -200, 200, -500, 500)
+        self.pidTheta = pid_controller.PIDController(75, 20, 1, -100, 100, -100, 100)
+        # self.pidTheta = pid_controller.PIDController(500, 100, 50, -200, 200, -200, 200)
+        # self.pidTheta = pid_controller.PIDController(1000, 20, 100, -200, 200, -200, 200)
 
     def run(self):
         self.create.start()
@@ -39,6 +39,9 @@ class Run:
             create2.Sensor.LeftEncoderCounts,
             create2.Sensor.RightEncoderCounts,
         ])
+
+        desired_angles = np.array([])
+        measured_angles = np.array([])
 
         goal_theta = math.pi / 2
         # goal_theta = -math.pi / 2
@@ -51,13 +54,15 @@ class Run:
             state = self.create.update()
             if state is not None:
                 self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
-                # print(self.odometry.theta)
                 print("[%.6f, %.6f, %.6f]" % (self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
                 new_row = [self.time.time(), math.degrees(self.odometry.theta), math.degrees(goal_theta)]
                 result = np.vstack([result, new_row])
 
                 reference = float(goal_theta)
                 measured = float(self.odometry.theta)
+
+                desired_angles = np.append(desired_angles, reference)
+                measured_angles = np.append(measured_angles, measured)
 
                 # Section 2.2
                 # delta_power = self.pdTheta.update(reference, measured, self.time.time())
@@ -73,4 +78,7 @@ class Run:
         plt.plot(result[:, 0], result[:, 2], label="goal")
         plt.grid()
         plt.legend()
-        plt.savefig("lab6_angle.png")  # make s ure to not overwrite plots
+        plt.savefig("lab5_angle.png")  # make s ure to not overwrite plots
+
+        np.savetxt("desired_angle_output.csv", desired_angles, delimiter=",")
+        np.savetxt("measured_angle_output.csv", measured_angles, delimiter=",")

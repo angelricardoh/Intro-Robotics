@@ -1,7 +1,6 @@
 from pyCreate2 import create2
 import math
 import numpy as np
-import copy
 
 # if on the robot, don't use X backend
 import matplotlib

@@ -24,7 +24,7 @@ class MyRobot:
     def __init__(self, create, time_helper, base_speed=None, position_tracking=False):
         self.__create = create
         self.__time_helper = time_helper
-        self.base_speed = 0.3  # base_speed 100 mm/s
+        self.base_speed = base_speed # base_speed 100 mm/s
         self.x = 0.0
         self.y = 0.0
         self.theta = 0
@@ -32,7 +32,7 @@ class MyRobot:
         self.prev_l_count = 0
         self.position_tracking = position_tracking
         self.count = 0
-        self.result = np.empty((0, 2))
+        self.result = np.empty((0, 4))
 
     def reset_count(self):
         state = self.__create.update()
@@ -114,7 +114,11 @@ class MyRobot:
             self.theta += delta_theta
             self.x += delta_d * math.cos(self.theta)
             self.y += delta_d * math.sin(self.theta)
-            new_row = [self.x, self.y]
+
+            ground_truth = self.__create.sim_get_position()
+            print("groundTruth = " + str(ground_truth))
+
+            new_row = [self.x, self.y, ground_truth[0], ground_truth[1]]
             self.result = np.vstack([self.result, new_row])
             theta_degrees = math.degrees(self.theta)
 
@@ -136,11 +140,9 @@ class MyRobot:
 
     def plot_path(self):
         plt.title("Path")
-        # Create a Rectangle patch
-        rect = patches.Rectangle((0, 0), 1, 0.5, linewidth=1, edgecolor='r', facecolor='none')
-        # Add the patch to the Axes
-        plt.add_patch(rect)
+
         plt.plot(self.result[:, 0], self.result[:, 1], label="odometry")
+        plt.plot(self.result[:, 2], self.result[:, 3], label="ground_truth")
 
         plt.grid()
         plt.legend()

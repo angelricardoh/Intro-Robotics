@@ -17,7 +17,7 @@ class Run:
         self.time = factory.create_time_helper()
 
     def run(self):
-        self.my_robot = MyRobot(self.create, self.time, 0.3)
+        self.my_robot = MyRobot(self.create, self.time, 0.1)
         self.my_robot.position_tracking = True
         
         self.create.start()
@@ -29,7 +29,6 @@ class Run:
             create2.Sensor.RightEncoderCounts,
         ])
 
-        default_turn_speed = 0.3 # Default speed to make 90 degree turns in 10 seg
         self.my_robot.reset_count()
         self.my_robot.print_state()
         # Lab 3 section 2.1

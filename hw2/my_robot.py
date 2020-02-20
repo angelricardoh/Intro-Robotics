@@ -9,10 +9,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-
-D = 0.072 # mts
-W = 0.235 # mts
-N = 508.8 # counts / revolutions
+D = 0.072  # mts
+W = 0.235  # mts
+N = 508.8  # counts / revolutions
 
 
 def get_delta(traveled_counts_encoder):
@@ -24,7 +23,7 @@ class MyRobot:
     def __init__(self, create, time_helper, base_speed=None, position_tracking=False):
         self.__create = create
         self.__time_helper = time_helper
-        self.base_speed = base_speed # base_speed 100 mm/s
+        self.base_speed = base_speed  # base_speed 100 mm/s
         self.x = 0.0
         self.y = 0.0
         self.theta = 0
@@ -33,6 +32,11 @@ class MyRobot:
         self.position_tracking = position_tracking
         self.count = 0
         self.result = np.empty((0, 4))
+        self.first_ground_truth_lecture = True
+        self.initial_ground_truth_x = 0
+        self.initial_ground_truth_y = 0
+
+        _ = self.__create.sim_get_position()
 
     def reset_count(self):
         state = self.__create.update()
@@ -41,7 +45,7 @@ class MyRobot:
             r_count = state.__dict__['rightEncoderCounts']
             self.prev_r_count = r_count
             self.prev_l_count = l_count
-    
+
     def forward(self, distance, speed=None):
         mm_over_seg_speed = self.get_mm_over_seg_speed(speed)
         duration = distance / (mm_over_seg_speed / 1e3)
@@ -79,7 +83,7 @@ class MyRobot:
         current_theta = self.theta
         while abs(math.degrees(current_theta) - math.degrees(self.theta)) < 90:
             self.update_odometry()
-        
+
     def sleep(self, duration):
         if not self.position_tracking:
             self.__time_helper.sleep(duration)
@@ -96,7 +100,7 @@ class MyRobot:
         if state is not None:
             print("x = %.4f y = %.4f degrees = %.4f" % (self.x, self.y, self.theta))
             print(state.__dict__)
-    
+
     def update_odometry(self):
         state = self.__create.update()
         if state is not None:
@@ -116,17 +120,16 @@ class MyRobot:
             self.y += delta_d * math.sin(self.theta)
 
             ground_truth = self.__create.sim_get_position()
-            print("groundTruth = " + str(ground_truth))
+            # print("groundTruth = " + str(ground_truth))
 
-            new_row = [self.x, self.y, ground_truth[0], ground_truth[1]]
+            if self.first_ground_truth_lecture:
+                self.initial_ground_truth_x = ground_truth[0]
+                self.initial_ground_truth_y = ground_truth[1]
+                self.first_ground_truth_lecture = False
+            new_row = [self.x, self.y, ground_truth[0] - self.initial_ground_truth_x, \
+                       ground_truth[1] - self.initial_ground_truth_y]
             self.result = np.vstack([self.result, new_row])
             theta_degrees = math.degrees(self.theta)
-
-            if self.count == 10:
-                print("x = %.4f y = %.4f degrees = %.4f" % (self.x, self.y, theta_degrees))
-                print(state.__dict__, flush=True)
-                self.count = 0
-            self.count += 1
 
     def stop(self, duration=None):
         if duration is not None:
@@ -147,7 +150,3 @@ class MyRobot:
         plt.grid()
         plt.legend()
         plt.savefig("hw2_path.png")  # make s ure to not overwrite plots
-
-
-
-

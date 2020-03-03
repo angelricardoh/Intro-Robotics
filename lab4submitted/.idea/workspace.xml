@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b12249d5-1846-41f5-99fc-afdea468f78b" name="Default Changelist" comment="">
+    <list default="true" id="b28ca519-fbc8-458c-a147-be3feefe7e9b" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../lab6/lab6e_solution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lab3submitted/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../lab3submitted/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../lab6/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/../lab6/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -13,7 +14,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectId" id="1XMoqWAhGrnHrBJJ1fP4YnA1a56" />
+  <component name="ProjectId" id="1YbJuVYUWDjfQOmIAVLcpivtypH" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -42,13 +43,12 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b12249d5-1846-41f5-99fc-afdea468f78b" name="Default Changelist" comment="" />
-      <created>1580865515136</created>
+      <changelist id="b28ca519-fbc8-458c-a147-be3feefe7e9b" name="Default Changelist" comment="" />
+      <created>1583205582536</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1580865515136</updated>
-      <workItem from="1580865516458" duration="41000" />
-      <workItem from="1583205441340" duration="141000" />
+      <updated>1583205582536</updated>
+      <workItem from="1583205592554" duration="56000" />
     </task>
     <servers />
   </component>

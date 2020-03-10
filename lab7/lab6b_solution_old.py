@@ -13,7 +13,7 @@ from enum import Enum
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-WAYPOINT_THRESHOLD = 0.1
+WAYPOINT_THRESHOLD = 0.05
 WALL_THRESHOLD = 0.75
 
 
@@ -29,36 +29,34 @@ class Run:
         # self.pdTheta = pd_controller2.PDController(500, 100, -200, 200, is_angle=True)
         # self.pdDistance = pd_controller2.PDController(1000, 0, -300, 300, is_angle=False)
         self.pidTheta = pid_controller.PIDController(300, 5, 50, [-10, 10], [-200, 200], is_angle=True)
-        self.pidWallFollowing = pid_controller.PIDController(300, 0, 100, [-75, 75], [-300, 300], is_angle=False)
+        # self.pidWallFollowing = pid_controller.PIDController(300, 0, 100, [-75, 75], [-300, 300], is_angle=False)
+        self.pidWallFollowing = pid_controller.PIDController(200, 50, 0, [0,0], [-50, 50])
+
         self.result = np.empty((0, 3))
         self.base_speed = 100
         self.current = ''
 
-
-    def sleep(self, time_in_sec, is_get_dist: bool = False, interrupt=lambda x: False):
-        result = math.inf
+    def sleep(self, time_in_sec):
+        """Sleeps for the specified amount of time while keeping odometry up-to-date
+        Args:
+            time_in_sec (float): time to sleep in seconds
+        """
         start = self.time.time()
         while True:
             state = self.create.update()
             if state is not None:
-                self.update_odometry(state)
-
+                self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
+                print("[{},{},{}]".format(self.odometry.x, self.odometry.y, math.degrees(self.odometry.theta)))
             t = self.time.time()
-
-            if is_get_dist:
-                result = min(self.sonar.get_distance(), result)
-
-            if start + time_in_sec <= t or interrupt(result):
+            if start + time_in_sec <= t:
                 break
 
-        return None if not is_get_dist else result
-
-    def go_to_angle(self, angle: float = 0, sleep_time: float = 0.5, is_get_dist: bool = False,
-                    interrupt=lambda x: False):
+    def go_to_angle(self, angle: float = 0, sleep_time: float = 0.5):
         self.servo.go_to(angle)
-        return self.sleep(sleep_time, is_get_dist=is_get_dist, interrupt=interrupt)
+        return self.sleep(sleep_time)
 
     def go_to_goal(self, goal_x: float, goal_y: float) -> None:
+        print("gotogoal")
         state = self.create.update()
         if state is not None:
             self.update_odometry(state)
@@ -68,20 +66,33 @@ class Run:
             self.create.drive_direct(int(self.base_speed + output_theta), int(self.base_speed - output_theta))
             distance = math.sqrt(math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
 
-    def wall_following(self, distance_to_wall, base_speed: float = 100.0) -> None:
-        state = self.create.update()
-        # distance_to_wall = self.sonar.get_distance()
-        if state is not None:
-            self.update_odometry(state)
+    def wall_following(self) -> None:
+        print("wf")
+        start = self.time.time()
+        end = self.time.time()
 
-            output_wall_follow = self.pidWallFollowing.update(distance_to_wall, WALL_THRESHOLD,
-                                                              self.time.time())
-            # print("wall_following" + str(output_wall_follow))
+        # goal_theta = math.atan2(goal_y - self.odometry.y, goal_x - self.odometry.x)
+        # print("wf: goal_angle", math.degrees(goal_theta))
 
-            v_right = int(base_speed - output_wall_follow)
-            v_left = int(base_speed + output_wall_follow)
-            # print("fw [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
-            self.create.drive_direct(v_right, v_left)
+        # self.go_to_angle(math.degrees(goal_theta));
+        while end - start < 1:
+            state = self.create.update()
+            distance_to_wall = self.sonar.get_distance()
+
+            print(end-start)
+            if state is not None:
+                self.update_odometry(state)
+
+                output_wall_follow = self.pidWallFollowing.update(distance_to_wall, WALL_THRESHOLD,
+                                                                  self.time.time())
+                print("wall_following" + str(output_wall_follow))
+
+                v_right = int(self.base_speed - output_wall_follow)
+                v_left = int(self.base_speed + output_wall_follow)
+                print("fw [v_right: %.2f, v_left: %.2f]" % (v_right, v_left))
+                self.create.drive_direct(v_right, v_left)
+                self.time.sleep(0.01)
+            end = self.time.time()
 
     def update_odometry(self, state):
         self.odometry.update(state.leftEncoderCounts, state.rightEncoderCounts)
@@ -122,7 +133,7 @@ class Run:
             # print("-----------------\nGoing to @{%.4f, %.4f}" % (goal_x, goal_y))
             previous_angle = math.degrees(self.odometry.theta)
             goal_distance = math.sqrt(math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
-            self.go_to_angle(0, 0.1)
+            self.go_to_angle(0, 1)
             while goal_distance > WAYPOINT_THRESHOLD:
                 distance_to_wall = self.sonar.get_distance()
                 current_angle = math.degrees(self.odometry.theta)
@@ -134,6 +145,7 @@ class Run:
                         self.current = "finished"
                         break
 
+                    # self.go_to_angle(0, 0.01)
                     self.current = "goal"
                     self.go_to_goal(goal_x, goal_y)
                     distance_to_wall = self.sonar.get_distance()
@@ -149,7 +161,7 @@ class Run:
 
                     self.current = "wall_following"
 
-                    self.wall_following(distance_to_wall, base_speed=100)
+                    self.wall_following()
 
                     current_angle = math.degrees(self.odometry.theta)
                     # print("fw [distance_to_wall: %.4f]\nfw [curr_angle: %.4f]\n" % (distance_to_wall, current_angle))
@@ -159,12 +171,12 @@ class Run:
                     distance_to_wall = self.sonar.get_distance()
 
                 if self.current == "wall_following":
-                    self.sleep(wall_follow_timeout)
-                    self.current = "init"
+                    # self.sleep(wall_follow_timeout)
+                    # self.current = "init"
 
                     self.create.drive_direct(0, 0)
-                    for offset in [-55, 0, 55]:
-                        self.go_to_angle(offset)
+                    for offset in [-70, 0, 70]:
+                        self.go_to_angle(offset, 2.0)
                         distance = self.sonar.get_distance()
                         if distance < WALL_THRESHOLD:
                             self.current = "wall_following"

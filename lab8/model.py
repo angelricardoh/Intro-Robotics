@@ -5,6 +5,7 @@ from pyCreate2 import create2
 import pid_controller
 import pd_controller
 from particle_filter import ParticleFilter, Command
+import random
 
 class Run:
     def __init__(self, factory):
@@ -24,69 +25,33 @@ class Run:
         self.map = lab8_map.Map("lab8_map.json")
         self.base_speed = 100
         self.odometry = odometry.Odometry()
-        self.particle_filter = ParticleFilter(map=self.map, virtual_create=self.virtual_create, num_particles=100)
+        self.particle_filter = ParticleFilter()
         _ = self.create.sim_get_position()
-
+        self.factory = factory
 
     def run(self):
+        # self.create = self.factory.create_create()
+        # self.virtual_create = self.factory.create_virtual_create()
 
         self.create.start()
         self.create.safe()
 
-        # request sensors
         self.create.start_stream([
-            create2.Sensor.LeftEncoderCounts,
-            create2.Sensor.RightEncoderCounts,
-        ])
-        # This is an example on how to visualize the pose of our estimated position
-        # where our estimate is that the robot is at (x,y,z)=(0.5,0.5,0.1) with heading pi
-        self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
+                    create2.Sensor.LeftEncoderCounts,
+                    create2.Sensor.RightEncoderCounts,
+                ])
 
-        # This is an example on how to show particles
-        # the format is x,y,z,theta,x,y,z,theta,...
-        # data = [0.5, 0.5, 0.1, math.pi / 2, 1.5, 1, 0.1, 0]
-        # self.virtual_create.set_point_cloud(data)
+        sleepValue = random.randrange(1, 1000000) / 1000000
+        sleepValue = 10 * sleepValue
+        # print(sleepValue)
+        self.sleep(sleepValue)
+        self.virtual_create.set_pose((1.0, 0.5, 0.1), 0)
 
-        # This is an example on how to estimate the distance to a wall for the given
-        # map, assuming the robot is at (0, 0) and has heading math.pi
-        print(self.map.closest_distance((0.5, 0.5), 0))
-        self.particle_filter.draw_particles()
+        self.forward(0.5)
+        print("[{}]".format(self.odometry.x))
 
-        # This is an example on how to detect that a button was pressed in V-REP
-        while True:
-            b = self.virtual_create.get_last_button()
-            if b == self.virtual_create.Button.MoveForward:
-                self.forward(0.5)
-                self.particle_filter.movement(Command.straight)
-                # print("Forward pressed!")
-            elif b == self.virtual_create.Button.TurnLeft:
-                self.turn_left()
-                self.particle_filter.movement(Command.turn_left)
 
-                # self.go_to_angle(self.odometry.theta+math.pi/2)
-                # print("Turn Left pressed!")
-            elif b == self.virtual_create.Button.TurnRight:
-                self.turn_right()
-                self.particle_filter.movement(Command.turn_right)
 
-                # self.go_to_angle(self.odometry.theta-math.pi/2)
-                # print("Turn Right pressed!")
-            elif b == self.virtual_create.Button.Sense:
-                distance = self.sonar.get_distance()
-                self.particle_filter.sensing(distance)
-
-                # print("Sense pressed!")
-
-            self.sleep(0.01)
-
-    def go_to_angle(self, goal_theta):
-        while math.fabs(math.atan2(
-                math.sin(goal_theta - self.odometry.theta),
-                math.cos(goal_theta - self.odometry.theta))) > 0.01:
-            output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
-            self.create.drive_direct(+output_theta, -output_theta)
-            self.update_odometry()
-        self.create.drive_direct(0, 0)
 
     def turn_left(self):
         self.create.drive_direct(self.base_speed, -self.base_speed)
@@ -106,8 +71,6 @@ class Run:
         self.create.drive_direct(int(self.base_speed), int(self.base_speed))
         self.sleep(distance / (self.base_speed / 1000))
         self.create.drive_direct(0, 0)
-        print("[{}]".format(self.odometry.x))
-
 
     def sleep(self, time_in_sec):
         """Sleeps for the specified amount of time while keeping odometry up-to-date

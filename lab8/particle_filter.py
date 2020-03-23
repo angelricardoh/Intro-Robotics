@@ -144,7 +144,7 @@ class ParticleFilter:
 
         # if n_effective < self.n_threshold:
         #     self.resample_particles()
-        # self.resample_particles()
+        self.resample_particles()
         self.estimation()
         self.draw_particles()
 

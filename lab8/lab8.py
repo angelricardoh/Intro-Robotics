@@ -6,6 +6,8 @@ import pid_controller
 import pd_controller
 from particle_filter import ParticleFilter, Command
 
+STRAIGHT_DISTANCE = 0.5
+
 class Run:
     def __init__(self, factory):
         """Constructor.
@@ -24,12 +26,19 @@ class Run:
         self.map = lab8_map.Map("lab8_map.json")
         self.base_speed = 100
         self.odometry = odometry.Odometry()
-        self.particle_filter = ParticleFilter(map=self.map, virtual_create=self.virtual_create, num_particles=100)
+        self.particle_filter = ParticleFilter(
+                                    map=self.map,
+                                    virtual_create=self.virtual_create,
+                                    num_particles=10,
+                                    distance=STRAIGHT_DISTANCE,
+                                    sigma_sensor=0.1,
+                                    sigma_theta=0.05,
+                                    sigma_distance=0.01,
+                                )
         _ = self.create.sim_get_position()
 
 
     def run(self):
-
         self.create.start()
         self.create.safe()
 
@@ -40,7 +49,7 @@ class Run:
         ])
         # This is an example on how to visualize the pose of our estimated position
         # where our estimate is that the robot is at (x,y,z)=(0.5,0.5,0.1) with heading pi
-        self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
+        # self.virtual_create.set_pose((0.5, 0.5, 0.1), 0)
 
         # This is an example on how to show particles
         # the format is x,y,z,theta,x,y,z,theta,...
@@ -49,33 +58,35 @@ class Run:
 
         # This is an example on how to estimate the distance to a wall for the given
         # map, assuming the robot is at (0, 0) and has heading math.pi
-        print(self.map.closest_distance((0.5, 0.5), 0))
+        # print(self.map.closest_distance((0.5, 0.5), 0))
         self.particle_filter.draw_particles()
 
         # This is an example on how to detect that a button was pressed in V-REP
         while True:
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
-                self.forward(0.5)
+                self.forward(STRAIGHT_DISTANCE)
                 self.particle_filter.movement(Command.straight)
                 # print("Forward pressed!")
             elif b == self.virtual_create.Button.TurnLeft:
                 self.turn_left()
-                self.particle_filter.movement(Command.turn_left)
+                self.particle_filter.movement(Command.turn_left, self.odometry.theta)
+                # turn_angle = math.pi / 2 + self.odometry.theta
+                # turn_angle %= 2 * math.pi
 
                 # self.go_to_angle(self.odometry.theta+math.pi/2)
                 # print("Turn Left pressed!")
             elif b == self.virtual_create.Button.TurnRight:
                 self.turn_right()
-                self.particle_filter.movement(Command.turn_right)
+                self.particle_filter.movement(Command.turn_right, self.odometry.theta)
+                # turn_angle = math.pi / 2 + self.odometry.theta
+                # turn_angle %= 2 * math.pi
 
                 # self.go_to_angle(self.odometry.theta-math.pi/2)
                 # print("Turn Right pressed!")
             elif b == self.virtual_create.Button.Sense:
                 distance = self.sonar.get_distance()
                 self.particle_filter.sensing(distance)
-
-                # print("Sense pressed!")
 
             self.sleep(0.01)
 
@@ -106,7 +117,6 @@ class Run:
         self.create.drive_direct(int(self.base_speed), int(self.base_speed))
         self.sleep(distance / (self.base_speed / 1000))
         self.create.drive_direct(0, 0)
-        print("[{}]".format(self.odometry.x))
 
 
     def sleep(self, time_in_sec):

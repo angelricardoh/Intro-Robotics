@@ -29,7 +29,7 @@ class Run:
         self.particle_filter = ParticleFilter(
                                     map=self.map,
                                     virtual_create=self.virtual_create,
-                                    num_particles=10,
+                                    num_particles=100,
                                     distance=STRAIGHT_DISTANCE,
                                     sigma_sensor=0.1,
                                     sigma_theta=0.05,
@@ -63,6 +63,7 @@ class Run:
 
         # This is an example on how to detect that a button was pressed in V-REP
         while True:
+            # self.particle_filter.draw_particles()
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
                 self.forward(STRAIGHT_DISTANCE)
@@ -72,6 +73,7 @@ class Run:
                 desired_angle = math.pi / 2 + self.odometry.theta
                 # desired_angle %= 2 * math.pi
                 self.particle_filter.movement(Command.turn_left, desired_angle)
+                self.sleep(0.01)
                 self.turn_left()
 
                 # self.go_to_angle(self.odometry.theta+math.pi/2)
@@ -80,6 +82,7 @@ class Run:
                 desired_angle = -math.pi / 2 + self.odometry.theta
                 # desired_angle %= 2 * math.pi
                 self.particle_filter.movement(Command.turn_right, desired_angle)
+                self.sleep(0.01)
                 self.turn_right()
 
                 # self.go_to_angle(self.odometry.theta-math.pi/2)
@@ -90,14 +93,14 @@ class Run:
 
             self.sleep(0.01)
 
-    def go_to_angle(self, goal_theta):
-        while math.fabs(math.atan2(
-                math.sin(goal_theta - self.odometry.theta),
-                math.cos(goal_theta - self.odometry.theta))) > 0.01:
-            output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
-            self.create.drive_direct(+output_theta, -output_theta)
-            self.update_odometry()
-        self.create.drive_direct(0, 0)
+    # def go_to_angle(self, goal_theta):
+    #     while math.fabs(math.atan2(
+    #             math.sin(goal_theta - self.odometry.theta),
+    #             math.cos(goal_theta - self.odometry.theta))) > 0.01:
+    #         output_theta = self.pidTheta.update(self.odometry.theta, goal_theta, self.time.time())
+    #         self.create.drive_direct(+output_theta, -output_theta)
+    #         self.update_odometry()
+    #     self.create.drive_direct(0, 0)
 
     def turn_left(self):
         self.create.drive_direct(self.base_speed, -self.base_speed)

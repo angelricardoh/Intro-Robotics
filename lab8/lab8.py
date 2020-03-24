@@ -67,10 +67,10 @@ class Run:
             b = self.virtual_create.get_last_button()
             if b == self.virtual_create.Button.MoveForward:
                 self.forward(STRAIGHT_DISTANCE)
-                self.particle_filter.movement(Command.straight)
+                self.particle_filter.movement(Command.straight, 0)
                 # print("Forward pressed!")
             elif b == self.virtual_create.Button.TurnLeft:
-                desired_angle = math.pi / 2 + self.odometry.theta
+                desired_angle = math.pi / 2
                 # desired_angle %= 2 * math.pi
                 self.particle_filter.movement(Command.turn_left, desired_angle)
                 self.sleep(0.01)
@@ -79,7 +79,7 @@ class Run:
                 # self.go_to_angle(self.odometry.theta+math.pi/2)
                 # print("Turn Left pressed!")
             elif b == self.virtual_create.Button.TurnRight:
-                desired_angle = -math.pi / 2 + self.odometry.theta
+                desired_angle = -math.pi / 2
                 # desired_angle %= 2 * math.pi
                 self.particle_filter.movement(Command.turn_right, desired_angle)
                 self.sleep(0.01)

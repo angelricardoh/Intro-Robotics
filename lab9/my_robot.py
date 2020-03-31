@@ -17,6 +17,7 @@ class MyRobot:
 
     def stop(self):
         self.create.drive_direct(0, 0)
+        self.time.sleep(10000)
 
     def turn_left(self, duration):
         self.create.drive_direct(int(self.base_speed * 1000.0), int(-self.base_speed * 1000.0))

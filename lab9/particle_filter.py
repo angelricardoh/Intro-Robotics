@@ -21,6 +21,10 @@ class ParticleFilter:
         self.num_of_particles = num_of_particles
         self.map = my_map
         self.bound = my_map.bottom_left, my_map.top_right
+        self.x = None
+        self.y = None
+        self.z = None
+        self.theta = None
 
         for _ in range(num_of_particles):
             x = np.random.uniform(self.bound[0][0], self.bound[1][0])
@@ -64,19 +68,19 @@ class ParticleFilter:
         if any(two_line_intersect(A, B, (w[0][0], w[0][1]), (w[1][0], w[1][1])) for w in self.map.get_walls()):
             return True
 
-    def sensing(self, z):
+    def sensing(self, z, replace=True):
         for p in self.particles:
             distance = self.map.closest_distance((p.x, p.y), p.theta)
-            p.weight = stats.norm.pdf(z, distance, self.noise[2]) #+ p.weight
-        self.resample()
+            p.weight = stats.norm.pdf(z, distance, self.noise[2])
+        self.resample(replace)
         self.estimation()
 
 
-    def resample(self):
+    def resample(self, replace=True):
         self.normalize()
         weights = [p.weight for p in self.particles]
         total_weight = sum(weights)
-        choice = np.random.choice(self.particles, size=self.num_of_particles, replace=True, p=weights/total_weight)
+        choice = np.random.choice(self.particles, size=len(self.particles), replace=replace, p=weights/total_weight)
         copy = []
         for p in choice:
             copy.append(Particle(x=p.x,y=p.y,z=p.z,theta=p.theta,weight=p.weight))
@@ -85,15 +89,17 @@ class ParticleFilter:
 
     def normalize(self):
         n = sum(p.weight for p in self.particles)
+        # for p in self.particles:
+        #     p.weight = 1 / p.weight
         for p in self.particles:
             p.weight /= n
 
     def estimation(self):
-        x = np.average([p.x for p in self.particles])
-        y = np.average([p.y for p in self.particles])
-        z = np.average([p.z for p in self.particles])
+        self.x = np.average([p.x for p in self.particles])
+        self.y = np.average([p.y for p in self.particles])
+        self.z = np.average([p.z for p in self.particles])
         theta = np.average([p.theta for p in self.particles])
-        self.xyz = (x, y, z)
+        self.xyz = (self.x, self.y, self.z)
         self.theta = theta
 
     def get_particle_list(self):

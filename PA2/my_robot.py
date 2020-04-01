@@ -40,6 +40,29 @@ class MyRobot:
         # print("Go to % d, % d deg, FK: [% .2f, % .2f, % .2f]" \
         #       % (math.degrees(theta_1), math.degrees(theta_2), self.x, self.y, self.z + self.arm_height_offset))
 
-    def stop(self):
-        self.create.drive_direct(0, 0)
-        self.time.sleep(1000)
+    def go_to_position(self, x, y, is_print_info=True):
+        goal_x = x
+        goal_y = y - self.arm_height_offset
+
+        r = euclidean_distance(0, 0, goal_x, goal_y)
+
+        alpha = math.acos((self.l1 ** 2 + self.l2 ** 2 - r ** 2) / (2 * self.l1 * self.l2))
+        beta = math.acos((r ** 2 + self.l1 ** 2 - self.l2 ** 2) / (2 * self.l1 * r))
+
+        theta_1_sol1 = math.atan2(goal_y, goal_x) - abs(beta) - math.pi / 2
+        theta_1_sol2 = math.atan2(goal_y, goal_x) + abs(beta) - math.pi / 2
+        theta_2_sol1 = math.pi - abs(alpha)
+        theta_2_sol2 = math.pi + abs(alpha)
+
+        # angle: < 0 to the right, > 0 to the left
+        angle_lower_arm = math.degrees(theta_1)
+        angle_upper_arm = math.degrees(theta_2)
+
+        # if is_print_info:
+        print("Go to [{:.2f}, {:.2f}], IK: [{:.2f} deg, {:.2f} deg]"
+              .format(x, y, angle_lower_arm, angle_upper_arm))
+
+        self.arm_go_to_angle(angle_lower_arm, angle_upper_arm)
+
+def euclidean_distance(start_x, start_y, dest_x, dest_y):
+    return math.sqrt((dest_x - start_x) ** 2 + (dest_y - start_y) ** 2)

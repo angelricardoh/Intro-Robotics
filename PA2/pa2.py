@@ -35,27 +35,27 @@ class MyRobot:
         self.arm.go_to(Links.UPPER_ORANGE_LINK.value, theta_2)
 
         x = self.l1 * math.cos(theta_1) + self.l2 * math.cos(theta_1 + theta_2)
-        y = self.l1 * math.sin(theta_1) + self.l2 * math.sin(theta_1 + theta_2)
+        z = self.l1 * math.sin(theta_1) + self.l2 * math.sin(theta_1 + theta_2)
 
         self.angle = "Go to % d, % d deg, FK: [%.2f, %.2f, %.2f]" \
-              % (math.degrees(theta_1), math.degrees(theta_2), x, y + self.arm_height_offset, 0)
+              % (math.degrees(theta_1), math.degrees(theta_2), x, 0, z + self.arm_height_offset)
 
-    def go_to_position(self, x, y):
-        y -= self.arm_height_offset
+    def go_to_position(self, x, z):
+        z_minus_offset = z - self.arm_height_offset
 
-        r = euclidean_distance(0, 0, x, y)
+        r = euclidean_distance(0, 0, x, z_minus_offset)
 
         clampped_alpha_parameters = clamp(((self.l1 ** 2 + self.l2 ** 2 - r ** 2) / (2 * self.l1 * self.l2)), -1, 1)
         clampped_beta_parameters = clamp(((r ** 2 + self.l1 ** 2 - self.l2 ** 2) / (2 * self.l1 * r)), -1, 1)
         alpha = math.acos(clampped_alpha_parameters)
         beta = math.acos(clampped_beta_parameters)
 
-        theta_1 = math.atan2(y, x) - abs(beta) - math.pi / 2
-        theta_1_sol2 = math.atan2(y, x) + abs(beta) - math.pi / 2
+        theta_1 = math.atan2(z_minus_offset, x) - abs(beta) - math.pi / 2
+        theta_1_sol2 = math.atan2(z_minus_offset, x) + abs(beta) - math.pi / 2
         theta_2 = math.pi - abs(alpha)
         theta_2_sol2 = math.pi + abs(alpha)
 
-        self.position = "Go to [%d, %d], IK: [%.2f deg, %.2f deg]" % (x, y, theta_1, theta_2)
+        self.position = "Go to [%d, %d], IK: [%.2f deg, %.2f deg]" % (x, z, theta_1, theta_2)
 
         self.arm_go_to_angle(theta_1, theta_2)
 
@@ -96,8 +96,8 @@ class MyRobot:
         self.arm.enable_painting()
         draw_color = random.random(), random.random(), random.random()
 
-        z_array = None;
-        x_array = None;
+        z_array = None
+        x_array = None
         if end_z - start_z == 0:
             z = np.arange(10, dtype=float)
             z_array = np.full_like(z, start_z)
@@ -115,16 +115,13 @@ class MyRobot:
         self.arm.disable_painting()
 
 
-def euclidean_distance(start_x, start_y, dest_x, dest_y):
-    return math.sqrt((dest_x - start_x) ** 2 + (dest_y - start_y) ** 2)
+def euclidean_distance(start_x, start_z, dest_x, dest_z):
+    return math.sqrt((dest_x - start_x) ** 2 + (dest_z - start_z) ** 2)
 
 
 def clamp(value, range_min, range_max):
     return max(min(value, range_max), range_min)
 
-
-def dist(p0, p1):
-    return np.sqrt(np.sum((p1 - p0) ** 2))
 
 
 class Run:
@@ -153,13 +150,11 @@ class Run:
         # for angle in range(0, 90):
         #     self.my_robot.arm_go_to_angle(42, math.radians(angle))
         #     print(self.my_robot.angle)
-
         # # Joint 88 out of bounds I guess joint 88 does not exist
         # print("Using joint 88 (range -180 to 0 degrees)")
         # # for angle in range(-180, 0):
         # #     self.my_robot.joint_go_to_angle(88, math.radians(angle))
         # #     print(self.my_robot.angle)
-
         # # Alternative use: self.my_robot.arm_go_to_angle(math.radians(45), math.radians(-90))
         # self.my_robot.arm_go_to_angle(math.pi / 4, -math.pi / 2)
         # print(self.my_robot.angle)

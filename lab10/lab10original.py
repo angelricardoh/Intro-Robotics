@@ -79,8 +79,7 @@ class Run:
         ])
 
         waypoints = [[n[0] / 100, n[1] / 100] for n in path]
-        # del waypoints[:10]
-        print(waypoints)
+        waypoints.pop(0)
 
         base_speed = 100
         start_time = self.time.time()
@@ -88,7 +87,7 @@ class Run:
         # with open('output.csv', 'w') as f:
         for waypoint in waypoints:
             goal_x = waypoint[0]
-            goal_y = 3.35 - waypoint[1]
+            goal_y = 3.1 - waypoint[1]
             # goal_x = 3.25 - waypoint[1]
             # goal_y = waypoint[0] - 3.0
             print("Going to: (%s, %s)" % (goal_x, goal_y))
@@ -115,7 +114,7 @@ class Run:
                     # improved version 1: stop if close enough to goal
                     distance = math.sqrt(
                         math.pow(goal_x - self.odometry.x, 2) + math.pow(goal_y - self.odometry.y, 2))
-                    if distance < 0.05:
+                    if distance < 0.1:
                         break
 
                 # improved version 2: fuse with velocity controller
@@ -138,29 +137,24 @@ class Run:
         # self.map.save("lab10_rrt.png")
 
         # Comment these out if you don't want user-chosen input
-        # start_x = int(input("Enter a start x-coordinate or -1 for random: "))
-        # if start_x is not -1:
-        #     start_y = int(input("Enter a start y-coordinate: "))
-        #
-        # goal_x = int(input("Enter a goal x-coordinate or -1 for random: "))
-        # if goal_x is not -1:
-        #     goal_y = int(input("Enter a goal y-coordinate: "))
-        #
-        # STEP_SIZE = int(input("Step size? "))
-        # NUM_ITER = int(input("Number of iterations?"))
-        # # Default to random if no (x,y) specified
-        # start_point = Node(self.map.get_random_loc(), None)
-        # goal_point = Node(self.map.get_random_loc(), None)
-        #
-        # if start_x is not -1:
-        #     start_point = Node((start_x, start_y), None)
-        # if goal_x is not -1:
-        #     goal_point = Node((goal_x, goal_y), None)
+        start_x = int(input("Enter a start x-coordinate or -1 for random: "))
+        if start_x is not -1:
+            start_y = int(input("Enter a start y-coordinate: "))
 
-        start_point = Node((270, 308), None)
-        goal_point = Node((40, 120), None)
-        STEP_SIZE = 35
-        NUM_ITER = 500000
+        goal_x = int(input("Enter a goal x-coordinate or -1 for random: "))
+        if goal_x is not -1:
+            goal_y = int(input("Enter a goal y-coordinate: "))
+
+        STEP_SIZE = int(input("Step size? "))
+        NUM_ITER = int(input("Number of iterations?"))
+        # Default to random if no (x,y) specified
+        start_point = Node(self.map.get_random_loc(), None)
+        goal_point = Node(self.map.get_random_loc(), None)
+
+        if start_x is not -1:
+            start_point = Node((start_x, start_y), None)
+        if goal_x is not -1:
+            goal_point = Node((goal_x, goal_y), None)
 
         self.map.draw_line(goal_point.loc, (goal_point.loc[0] + 3, goal_point.loc[1] + 3), (0, 255, 0), width=10)
 
@@ -200,20 +194,7 @@ class Run:
             # IF  new_node is clear from obstacle:
             # Add new_node(point_data, parent_node) to tree (which can just be an array of Nodes)
             # Draw new line segment into map
-            rand_loc_x = rand_loc[0]
-            rand_loc_y = rand_loc[1]
-            diff_x = 0
-            diff_y = 0
-
-            if new_y > rand_loc_y:
-                diff_y = 15
-
-            if new_x < rand_loc_x:
-                diff_x = 15
-
-            if not self.map.has_obstacle(new_x, new_y) and not self.map.has_obstacle(new_x - diff_x, new_y) and \
-                        not self.map.has_obstacle(new_x, new_y + diff_y) and not self.map.has_obstacle(new_x - diff_x,
-                                                                                               new_y + diff_y):
+            if not self.map.has_obstacle(new_x, new_y):
                 new_node = Node((new_x, new_y), close_node)
 
                 # DEBUG

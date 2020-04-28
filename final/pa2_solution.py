@@ -66,14 +66,14 @@ class Run:
         # print("Using joint 3 (range -90 to 90 degrees)")
 
         # # test forward kinematics
-        # self.forward_kinematics(math.radians(60), math.radians(-70))
-        # self.time.sleep(1.0)
-        # self.forward_kinematics(math.radians(45), math.radians(-45))
-        # self.time.sleep(1.0)
-        # self.forward_kinematics(math.radians(90), math.radians(90))
-        # self.time.sleep(1.0)
-        # self.forward_kinematics(math.radians(-70), math.radians(45))
-        # self.time.sleep(1.0)
+        self.forward_kinematics(math.radians(60), math.radians(-70))
+        self.time.sleep(1.0)
+        self.forward_kinematics(math.radians(45), math.radians(-45))
+        self.time.sleep(1.0)
+        self.forward_kinematics(math.radians(90), math.radians(90))
+        self.time.sleep(1.0)
+        self.forward_kinematics(math.radians(-70), math.radians(45))
+        self.time.sleep(1.0)
 
         # # test inverse kinematics
         # self.arm.set_color(0.0, 0.0, 1.0)

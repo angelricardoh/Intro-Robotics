@@ -16,8 +16,7 @@ class Joints(Enum):
 
 SPEED_FACTOR = 2.0
 SLEEP_FACTOR = 0.05
-CUP_Z_COORDINATE = 0.12  # Z_AXIS
-INITIAL_PICKUP_ANGLE = -70
+GRIPPER_HEAD_SIZE = 0.31
 
 ADJACENT_SIDE_TO_SHELVES = 0.5  # X_AXIS
 OPPOSITE_SIDE_TO_SHELVES = 0.6  # Y_AXIS
@@ -37,13 +36,19 @@ class MyArmRobot:
         self.distance_cup_arm_y_axis = None
         self.hypotenuse_distance_cup = None
         self.angle_to_cup = None
+        self.cup_z_coordinate = 0.12
+        self.pick_up_angle = -30
 
     def set_create_coordinates(self, coor_x, coor_y):
         print("Coordinates")
         print(coor_x)
         print(coor_y)
-        self.hypotenuse_distance_cup = math.sqrt(coor_x * coor_x + \
-                                                 coor_y * coor_y)
+        self.distance_cup_arm_x_axis = coor_x
+        self.distance_cup_arm_y_axis = coor_y
+        hypotenuse_distance_cup = '%.3f' % math.sqrt(self.distance_cup_arm_x_axis * self.distance_cup_arm_x_axis + \
+                                                 self.distance_cup_arm_y_axis * self.distance_cup_arm_y_axis)
+        self.hypotenuse_distance_cup = float(hypotenuse_distance_cup)
+
         self.angle_to_cup = math.atan2(coor_x, coor_y)
 
     def grab_cup_and_go_to_initial_position(self):
@@ -66,12 +71,24 @@ class MyArmRobot:
 
         print("inverse kinematics")
 
-        self.inverse_kinematics(-(self.hypotenuse_distance_cup) + 0.327, CUP_Z_COORDINATE)
+        if not self.inverse_kinematics(-(self.hypotenuse_distance_cup) + GRIPPER_HEAD_SIZE, self.cup_z_coordinate):
+            moved = False
+            for y in np.arange(self.distance_cup_arm_y_axis - 0.01, self.distance_cup_arm_y_axis + 0.05, 0.005):
+                for z in np.arange(self.cup_z_coordinate - 0.05, self.cup_z_coordinate + 0.05, 0.005):
+                    hypotenuse_distance_cup = '%.3f' % math.sqrt(
+                        self.distance_cup_arm_x_axis * self.distance_cup_arm_x_axis + \
+                        y * y)
+                    self.hypotenuse_distance_cup = float(hypotenuse_distance_cup)
+                    self.pick_up_angle = -10
+                    if self.inverse_kinematics(-(self.hypotenuse_distance_cup + (self.distance_cup_arm_y_axis - y)) + GRIPPER_HEAD_SIZE, z):
+                        moved = True
+                        break
         self.time.sleep(3)
+
 
         print("goto GRIPPER")
 
-        self.go_to(Joints.GRIPPER, -65)
+        self.go_to(Joints.GRIPPER, self.pick_up_angle)
         self.time.sleep(3)
 
         print("close GRIPPER")
@@ -188,6 +205,7 @@ class MyArmRobot:
                 print("Not possible")
                 return False
         except:
+            print("Not possible")
             return False
         if calculate_angle:
             return True
@@ -199,6 +217,7 @@ class MyArmRobot:
             self.go_to(Joints.UPPER_ORANGE, math.degrees(theta2))
 
         print("Go to [{},{}], IK: [{} deg, {} deg]".format(x_i, z_i, math.degrees(theta1), math.degrees(theta2)))
+        return True
 
     def __move(self, to_theta_1, to_theta_2, body=None):
         if body:

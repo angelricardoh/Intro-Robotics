@@ -172,15 +172,15 @@ class Run:
 
         # 3 Inverse Kinematics
 
-        # self.my_robot.go_to_position(0, 0)
-        # print(self.my_robot.position)
-        # self.time.sleep(5)
-        # self.my_robot.go_to_position(0, 1)
-        # print(self.my_robot.position)
-        # self.time.sleep(5)
-        # self.my_robot.go_to_position(0, 2)
-        # print(self.my_robot.position)
-        # self.time.sleep(5)
+        self.my_robot.go_to_position(0, 0)
+        print(self.my_robot.position)
+        self.time.sleep(5)
+        self.my_robot.go_to_position(0, 1)
+        print(self.my_robot.position)
+        self.time.sleep(5)
+        self.my_robot.go_to_position(0, 2)
+        print(self.my_robot.position)
+        self.time.sleep(5)
 
 
         # 4.1 rectangle attempt 1

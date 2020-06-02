@@ -51,14 +51,14 @@ class RRT:
             x_new = x_near.state + (x - x_near.state) / dist * delta
         # if not self.img.has_obstacle(x_new[0], x_new[1]):
         if not self.img.has_obstacle(x_new[0], x_new[1]) and \
-                not self.img.has_obstacle(x_new[0] + 10, x_new[1]) and \
-                not self.img.has_obstacle(x_new[0] + -10, x_new[1]) and \
-                not self.img.has_obstacle(x_new[0], x_new[1] + 10) and \
-                not self.img.has_obstacle(x_new[0], x_new[1] - 10) and \
-                not self.img.has_obstacle(x_new[0] + 10, x_new[1] + 10) and \
-                not self.img.has_obstacle(x_new[0] + 10, x_new[1] - 10) and \
-                not self.img.has_obstacle(x_new[0] - 10, x_new[1] + 10) and \
-                not self.img.has_obstacle(x_new[0] - 10, x_new[1] - 10):
+                not self.img.has_obstacle(x_new[0] + 20, x_new[1]) and \
+                not self.img.has_obstacle(x_new[0] + -20, x_new[1]) and \
+                not self.img.has_obstacle(x_new[0], x_new[1] + 20) and \
+                not self.img.has_obstacle(x_new[0], x_new[1] - 20) and \
+                not self.img.has_obstacle(x_new[0] + 20, x_new[1] + 20) and \
+                not self.img.has_obstacle(x_new[0] + 20, x_new[1] - 20) and \
+                not self.img.has_obstacle(x_new[0] - 20, x_new[1] + 20) and \
+                not self.img.has_obstacle(x_new[0] - 20, x_new[1] - 20):
                 
             self.T.append(Vertex(x_new))
             x_near.neighbors.append(self.T[-1])
